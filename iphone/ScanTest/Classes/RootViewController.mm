@@ -28,9 +28,10 @@
 }
 
 - (IBAction)scanPressed:(id)sender {
-	
-  ZXingWidgetController *widController = [[ZXingWidgetController alloc] initWithDelegate:self showCancel:YES OneDMode:NO];
-  QRCodeReader* qrcodeReader = [[QRCodeReader alloc] init];
+	UIImage *image = [UIImage imageNamed:@"red-button.png"];
+	UIImage* stretchableImage = [image stretchableImageWithLeftCapWidth:12
+														   topCapHeight:0];
+	ZXingWidgetController *widController = [[ZXingWidgetController alloc] initWithDelegate:self showCancel:YES OneDMode:NO cancelButtonImage:stretchableImage];QRCodeReader* qrcodeReader = [[QRCodeReader alloc] init];
   NSSet *readers = [[NSSet alloc ] initWithObjects:qrcodeReader,nil];
   [qrcodeReader release];
   widController.readers = readers;

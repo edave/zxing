@@ -16,7 +16,7 @@
 
 #import "OverlayView.h"
 
-static const CGFloat kPadding = 10;
+static const CGFloat kPadding = 40;
 
 @interface OverlayView()
 @property (nonatomic,assign) UIButton *cancelButton;
@@ -34,7 +34,7 @@ static const CGFloat kPadding = 10;
 @synthesize displayedMessage;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-- (id) initWithFrame:(CGRect)theFrame cancelEnabled:(BOOL)isCancelEnabled oneDMode:(BOOL)isOneDModeEnabled {
+-(id) initWithFrame:(CGRect)theFrame cancelEnabled:(BOOL)isCancelEnabled oneDMode:(BOOL)isOneDModeEnabled cancelButtonImage:(UIImage*)image{
   self = [super initWithFrame:theFrame];
   if( self ) {
 
@@ -49,8 +49,17 @@ static const CGFloat kPadding = 10;
     self.backgroundColor = [UIColor clearColor];
     self.oneDMode = isOneDModeEnabled;
     if (isCancelEnabled) {
-      UIButton *butt = [UIButton buttonWithType:UIButtonTypeRoundedRect]; 
-      self.cancelButton = butt;
+		UIButton *butt;
+		if(image != nil){
+		butt = [UIButton buttonWithType:UIButtonTypeCustom];
+		[butt setBackgroundImage:image
+				forState:UIControlStateNormal];
+		}else{
+		butt = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+		}
+		self.cancelButton = butt;
+		cancelButton.titleLabel.font = [UIFont boldSystemFontOfSize:20];
+		cancelButton.titleLabel.shadowOffset = CGSizeMake(0.0, -1.0);
       [cancelButton setTitle:@"Cancel" forState:UIControlStateNormal];
       if (oneDMode) {
         [cancelButton setTransform:CGAffineTransformMakeRotation(M_PI/2)];
@@ -59,7 +68,7 @@ static const CGFloat kPadding = 10;
       }
       else {
         CGSize theSize = CGSizeMake(100, 50);
-        CGRect theRect = CGRectMake((theFrame.size.width - theSize.width) / 2, cropRect.origin.y + cropRect.size.height + 20, theSize.width, theSize.height);
+        CGRect theRect = CGRectMake((theFrame.size.width - theSize.width) / 2, cropRect.origin.y + cropRect.size.height + 40, theSize.width, theSize.height);
         [cancelButton setFrame:theRect];
         
       }
@@ -135,18 +144,37 @@ static const CGFloat kPadding = 10;
 - (void)drawRect:(CGRect)rect {
 	[super drawRect:rect];
   if (displayedMessage == nil) {
-    self.displayedMessage = @"Place a barcode inside the viewfinder rectangle to scan it.";
+    self.displayedMessage = @"Center the barcode";
   }
 	CGContextRef c = UIGraphicsGetCurrentContext();
   
 	if (nil != _points) {
     //		[imageView.image drawAtPoint:cropRect.origin];
 	}
+	CGContextSetLineWidth(c, 2.0);
+ 	CGContextSetLineJoin(c, kCGLineJoinRound);
+ 	CGContextSetShadow(c, CGSizeMake(0.0f, 1.0f), 2.0f);
+ 	CGContextSaveGState(c);
 	
 	CGFloat white[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 	CGContextSetStrokeColor(c, white);
-	CGContextSetFillColor(c, white);
-	[self drawRect:cropRect inContext:c];
+	float extension = (kPadding/2.0f);
+ 	float dashLengths[] = {8,6};
+ 	CGContextSetLineDash(c, 0, dashLengths, 2);
+ 	CGContextSetLineWidth(c, 1.0);
+ 	CGContextMoveToPoint(c, cropRect.origin.x + (cropRect.size.width / 2.0f), cropRect.origin.y - extension);
+ 	CGContextAddLineToPoint(c, cropRect.origin.x + (cropRect.size.width / 2.0f), cropRect.origin.y + cropRect.size.height + extension);
+ 	CGContextStrokePath(c);
+ 	CGContextMoveToPoint(c, cropRect.origin.x - extension+3.0f, cropRect.origin.y + (cropRect.size.height / 2.0f) - 2.0f);
+ 	CGContextAddLineToPoint(c, cropRect.origin.x + cropRect.size.width + extension+3.0f, cropRect.origin.y + (cropRect.size.height / 2.0f) - 2.0f);
+ 	CGContextStrokePath(c);
+ 	CGContextRestoreGState(c);
+ 	
+	CGFloat whiteTranslucent[4] = {0.9f, 0.9f, 0.9f, 0.25f};
+ 	CGContextSetStrokeColor(c, whiteTranslucent);
+	CGContextStrokeEllipseInRect(c, cropRect);
+ 	
+	//[self drawRect:cropRect inContext:c];
 	
   //	CGContextSetStrokeColor(c, white);
 	//	CGContextSetStrokeColor(c, white);
@@ -159,11 +187,14 @@ static const CGFloat kPadding = 10;
 		CGContextShowTextAtPoint(c, 74.0, 285.0, text, 49);
 	}
 	else {
-    UIFont *font = [UIFont systemFontOfSize:18];
-    CGSize constraint = CGSizeMake(rect.size.width  - 2 * kTextMargin, cropRect.origin.y);
-    CGSize displaySize = [self.displayedMessage sizeWithFont:font constrainedToSize:constraint];
-    CGRect displayRect = CGRectMake((rect.size.width - displaySize.width) / 2 , cropRect.origin.y - displaySize.height, displaySize.width, displaySize.height);
-    [self.displayedMessage drawInRect:displayRect withFont:font lineBreakMode:UILineBreakModeWordWrap alignment:UITextAlignmentCenter];
+		UIFont *font = [UIFont boldSystemFontOfSize:24];
+		CGSize constraint = CGSizeMake(rect.size.width  - 2 * kTextMargin, cropRect.origin.y);
+		CGSize displaySize = [self.displayedMessage sizeWithFont:font constrainedToSize:constraint];
+		CGRect displayRect = CGRectMake((rect.size.width - displaySize.width) / 2 , cropRect.origin.y - displaySize.height - 60.0f, displaySize.width, displaySize.height);
+		CGFloat whiteOpaque[4] = {0.9f, 0.9f, 0.9f, 0.95f};
+		CGContextSetFillColor(c, whiteOpaque);
+		CGContextSetShadow(c, CGSizeMake(0.0f, 2.0f), 2.0f);
+		[self.displayedMessage drawInRect:displayRect withFont:font lineBreakMode:UILineBreakModeWordWrap alignment:UITextAlignmentCenter];
 	}
 	CGContextRestoreGState(c);
 	int offset = rect.size.width / 2;
@@ -179,9 +210,10 @@ static const CGFloat kPadding = 10;
 		CGContextStrokePath(c);
 	}
 	if( nil != _points ) {
-		CGFloat blue[4] = {0.0f, 1.0f, 0.0f, 1.0f};
+		CGFloat blue[4] = {0.19607f, 0.78823f, 0.22475f, 0.85f};
 		CGContextSetStrokeColor(c, blue);
 		CGContextSetFillColor(c, blue);
+		CGContextSetLineWidth(c, 3.0);
 		if (oneDMode) {
 			CGPoint val1 = [self map:[[_points objectAtIndex:0] CGPointValue]];
 			CGPoint val2 = [self map:[[_points objectAtIndex:1] CGPointValue]];

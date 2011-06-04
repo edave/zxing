@@ -53,7 +53,7 @@
 @synthesize readers;
 
 
-- (id)initWithDelegate:(id<ZXingDelegate>)scanDelegate showCancel:(BOOL)shouldShowCancel OneDMode:(BOOL)shouldUseoOneDMode {
+- (id)initWithDelegate:(id<ZXingDelegate>)scanDelegate showCancel:(BOOL)shouldShowCancel OneDMode:(BOOL)shouldUseoOneDMode cancelButtonImage:(UIImage*)image {
   self = [super init];
   if (self) {
     [self setDelegate:scanDelegate];
@@ -64,7 +64,8 @@
     decoding = NO;
     OverlayView *theOverLayView = [[OverlayView alloc] initWithFrame:[UIScreen mainScreen].bounds 
                                                        cancelEnabled:showCancel 
-                                                            oneDMode:oneDMode];
+                                                            oneDMode:oneDMode
+												   cancelButtonImage:image];
     [theOverLayView setDelegate:self];
     self.overlayView = theOverLayView;
     [theOverLayView release];
