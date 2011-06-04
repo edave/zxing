@@ -481,38 +481,48 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 }
 
 #pragma mark - Torch
+- (void)setTorch:(AVCaptureTorchMode)status {
+	Class captureDeviceClass = NSClassFromString(@"AVCaptureDevice");
+	if (captureDeviceClass != nil) {
+		
+		AVCaptureDevice *device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+		
+		[device lockForConfiguration:nil];
+		if ( [device hasTorch] ) {
+			[device setTorchMode:status];
+		}
+		[device unlockForConfiguration];
+		
+	}
+}
 
-- (void)setTorch:(BOOL)status {
-  Class captureDeviceClass = NSClassFromString(@"AVCaptureDevice");
-  if (captureDeviceClass != nil) {
-    
-    AVCaptureDevice *device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
-    
-    [device lockForConfiguration:nil];
-    if ( [device hasTorch] ) {
-      if ( status ) {
-        [device setTorchMode:AVCaptureTorchModeOn];
-      } else {
-        [device setTorchMode:AVCaptureTorchModeOn];
-      }
-    }
-    [device unlockForConfiguration];
-    
-  }
+
+- (AVCaptureTorchMode)torchStatus{
+	Class captureDeviceClass = NSClassFromString(@"AVCaptureDevice");
+	if (captureDeviceClass != nil) {
+		
+		AVCaptureDevice *device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+		
+		if ( [device hasTorch] ) {
+			return [device torchMode];
+		}
+		[device unlockForConfiguration];
+	}
+	return AVCaptureTorchModeOff;
 }
 
 - (BOOL)torchIsOn {
-  Class captureDeviceClass = NSClassFromString(@"AVCaptureDevice");
-  if (captureDeviceClass != nil) {
-    
-    AVCaptureDevice *device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
-    
-    if ( [device hasTorch] ) {
-      return [device torchMode] == AVCaptureTorchModeOn;
-    }
-    [device unlockForConfiguration];
-  }
-  return NO;
+	Class captureDeviceClass = NSClassFromString(@"AVCaptureDevice");
+	if (captureDeviceClass != nil) {
+		
+		AVCaptureDevice *device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+		
+		if ( [device hasTorch] ) {
+			return [device torchMode] == AVCaptureTorchModeOn;
+		}
+		[device unlockForConfiguration];
+	}
+	return NO;
 }
 
 @end

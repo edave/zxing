@@ -64,7 +64,8 @@
 - (id)initWithDelegate:(id<ZXingDelegate>)delegate showCancel:(BOOL)shouldShowCancel OneDMode:(BOOL)shouldUseoOneDMode cancelButtonImage:(UIImage*)image;
 
 - (BOOL)fixedFocus;
-- (void)setTorch:(BOOL)status;
+- (void)setTorch:(AVCaptureTorchMode)status;
+- (AVCaptureTorchMode)torchStatus;
 - (BOOL)torchIsOn;
 
 @end
